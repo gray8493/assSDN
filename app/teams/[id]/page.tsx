@@ -228,7 +228,6 @@ export default function TeamDetailPage({
     if (team.ownerId === user.id) return "OWNER";
     return null;
   }, [team, user, myMembership]);
-  const isOwner = myRole === "OWNER";
 
   // Add Member
   const handleAddMember = async (e: React.FormEvent) => {

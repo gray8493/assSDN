@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { loadTeamAccess } from "@/lib/teamAccess";
 import { can, canAssignTo } from "@/lib/permissions";
+import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
 
 // GET /api/teams/:id/tasks – List tasks for a team
 export async function GET(
@@ -152,6 +153,10 @@ export async function POST(
         },
       },
     });
+
+    broadcastEvent(TEAM_CHANNEL(teamId), EVENTS.TASK_CREATED, newTask).catch(
+      () => undefined
+    );
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {

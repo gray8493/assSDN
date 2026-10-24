@@ -8,6 +8,7 @@ import {
   canModifyTask,
   type Role,
 } from "@/lib/permissions";
+import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
 
 const taskInclude = {
   assignee: {
@@ -146,6 +147,14 @@ export async function PUT(
       include: taskInclude,
     });
 
+    if (existingTask.teamId) {
+      broadcastEvent(
+        TEAM_CHANNEL(existingTask.teamId),
+        EVENTS.TASK_UPDATED,
+        updatedTask
+      ).catch(() => undefined);
+    }
+
     return NextResponse.json(updatedTask);
   } catch (error) {
     console.error("Failed to update task:", error);
@@ -216,6 +225,14 @@ export async function DELETE(
     await prisma.task.delete({
       where: { id },
     });
+
+    if (existingTask.teamId) {
+      broadcastEvent(
+        TEAM_CHANNEL(existingTask.teamId),
+        EVENTS.TASK_DELETED,
+        { id: existingTask.id, teamId: existingTask.teamId }
+      ).catch(() => undefined);
+    }
 
     return NextResponse.json({ message: "Task deleted successfully", id });
   } catch (error) {
