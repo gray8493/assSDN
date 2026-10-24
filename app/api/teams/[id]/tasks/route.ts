@@ -156,9 +156,7 @@ export async function POST(
       },
     });
 
-    broadcastEvent(TEAM_CHANNEL(teamId), EVENTS.TASK_CREATED, newTask).catch(
-      () => undefined
-    );
+    await broadcastEvent(TEAM_CHANNEL(teamId), EVENTS.TASK_CREATED, newTask);
     logActivity({
       teamId,
       userId: authUser.id,

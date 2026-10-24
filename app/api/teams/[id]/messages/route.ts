@@ -134,10 +134,9 @@ export async function POST(
       },
     });
 
-    // Broadcast (fire and forget – DB save already succeeded)
-    broadcastEvent(TEAM_CHANNEL(teamId), "message.new", message).catch(
-      () => undefined
-    );
+    // Broadcast BEFORE responding – serverless platforms freeze the function
+    // right after the response returns, killing in-flight background fetches.
+    await broadcastEvent(TEAM_CHANNEL(teamId), "message.new", message);
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {

@@ -152,11 +152,11 @@ export async function PUT(
     });
 
     if (existingTask.teamId) {
-      broadcastEvent(
+      await broadcastEvent(
         TEAM_CHANNEL(existingTask.teamId),
         EVENTS.TASK_UPDATED,
         updatedTask
-      ).catch(() => undefined);
+      );
 
       logActivity({
         teamId: existingTask.teamId,
@@ -251,11 +251,11 @@ export async function DELETE(
     });
 
     if (existingTask.teamId) {
-      broadcastEvent(
+      await broadcastEvent(
         TEAM_CHANNEL(existingTask.teamId),
         EVENTS.TASK_DELETED,
         { id: existingTask.id, teamId: existingTask.teamId }
-      ).catch(() => undefined);
+      );
 
       logActivity({
         teamId: existingTask.teamId,
