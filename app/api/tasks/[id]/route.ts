@@ -10,6 +10,7 @@ import {
 } from "@/lib/permissions";
 import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
 import { notifyTaskAssigned } from "@/lib/notifications";
+import { logActivity, ACTIVITY_ACTIONS } from "@/lib/activityLog";
 
 const taskInclude = {
   assignee: {
@@ -156,6 +157,15 @@ export async function PUT(
         EVENTS.TASK_UPDATED,
         updatedTask
       ).catch(() => undefined);
+
+      logActivity({
+        teamId: existingTask.teamId,
+        userId: authUser.id,
+        action: ACTIVITY_ACTIONS.TASK_UPDATED,
+        targetType: "TASK",
+        targetId: updatedTask.id,
+        detail: `updated task "${updatedTask.title}"`,
+      });
     }
 
     // Notify when the task got a (new) assignee, not for self-assignment
@@ -246,6 +256,15 @@ export async function DELETE(
         EVENTS.TASK_DELETED,
         { id: existingTask.id, teamId: existingTask.teamId }
       ).catch(() => undefined);
+
+      logActivity({
+        teamId: existingTask.teamId,
+        userId: authUser.id,
+        action: ACTIVITY_ACTIONS.TASK_DELETED,
+        targetType: "TASK",
+        targetId: existingTask.id,
+        detail: `deleted task "${existingTask.title}"`,
+      });
     }
 
     return NextResponse.json({ message: "Task deleted successfully", id });

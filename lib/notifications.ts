@@ -8,6 +8,7 @@ import { USER_CHANNEL } from "@/lib/channels";
 export const NOTIFICATION_TYPES = {
   TASK_ASSIGNED: "TASK_ASSIGNED",
   TEAM_ADDED: "TEAM_ADDED",
+  ROLE_CHANGED: "ROLE_CHANGED",
 } as const;
 
 export interface CreateNotificationInput {

@@ -10,7 +10,7 @@ import {
   type PermissionCheckResult,
 } from "@/lib/permissions";
 
-type TeamMemberRow = { id: string; userId: string; role: string };
+type TeamMemberRow = { id: string; userId: string; role: string; user: { name: string } };
 
 type TeamWithMembers = {
   id: string;
@@ -39,7 +39,7 @@ export async function loadTeamAccess(
     where: { id: teamId },
     include: {
       members: {
-        select: { id: true, userId: true, role: true },
+        select: { id: true, userId: true, role: true, user: { select: { name: true } } },
       },
     },
   });

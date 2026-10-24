@@ -5,6 +5,7 @@ import { loadTeamAccess } from "@/lib/teamAccess";
 import { can, canAssignTo } from "@/lib/permissions";
 import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
 import { notifyTaskAssigned } from "@/lib/notifications";
+import { logActivity, ACTIVITY_ACTIONS } from "@/lib/activityLog";
 
 // GET /api/teams/:id/tasks – List tasks for a team
 export async function GET(
@@ -158,6 +159,14 @@ export async function POST(
     broadcastEvent(TEAM_CHANNEL(teamId), EVENTS.TASK_CREATED, newTask).catch(
       () => undefined
     );
+    logActivity({
+      teamId,
+      userId: authUser.id,
+      action: ACTIVITY_ACTIONS.TASK_CREATED,
+      targetType: "TASK",
+      targetId: newTask.id,
+      detail: `created task "${newTask.title}"`,
+    });
 
     if (newTask.assigneeId) {
       // Persist + broadcast notification BEFORE responding (deterministic;

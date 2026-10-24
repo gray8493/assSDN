@@ -8,6 +8,8 @@ import {
   isRole,
   type Role,
 } from "@/lib/permissions";
+import { logActivity, ACTIVITY_ACTIONS } from "@/lib/activityLog";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string; userId: string }> };
 
@@ -85,6 +87,26 @@ export async function PUT(request: Request, { params }: Params) {
       },
     });
 
+    logActivity({
+      teamId,
+      userId: authUser.id,
+      action: ACTIVITY_ACTIONS.ROLE_CHANGED,
+      targetType: "MEMBER",
+      targetId: targetUserId,
+      detail: `changed ${updated.user.name}'s role from ${targetRole} to ${check.newRole}`,
+    });
+
+    // Inform the member whose role changed (not for self-changes)
+    if (targetUserId !== authUser.id) {
+      await createNotification({
+        userId: targetUserId,
+        type: NOTIFICATION_TYPES.ROLE_CHANGED,
+        message: `${access.team.name}: Your role was changed to ${check.newRole.toLowerCase()}`,
+        link: `/teams/${teamId}`,
+        refId: teamId,
+      });
+    }
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Change member role error:", error);
@@ -145,6 +167,15 @@ export async function DELETE(request: Request, { params }: Params) {
 
     await prisma.teamMember.delete({
       where: { id: membership.id },
+    });
+
+    logActivity({
+      teamId,
+      userId: authUser.id,
+      action: ACTIVITY_ACTIONS.MEMBER_REMOVED,
+      targetType: "MEMBER",
+      targetId: targetUserId,
+      detail: `removed ${membership.user.name} from the team`,
     });
 
     return NextResponse.json({

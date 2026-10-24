@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { loadTeamAccess } from "@/lib/teamAccess";
 import { can } from "@/lib/permissions";
+import { logActivity, ACTIVITY_ACTIONS } from "@/lib/activityLog";
 
 // GET /api/teams/:id – Get team details, including members and tasks
 export async function GET(
@@ -125,6 +126,15 @@ export async function PUT(
           },
         },
       },
+    });
+
+    logActivity({
+      teamId: id,
+      userId: authUser.id,
+      action: ACTIVITY_ACTIONS.TEAM_UPDATED,
+      targetType: "TEAM",
+      targetId: id,
+      detail: "updated team information",
     });
 
     return NextResponse.json(updatedTeam);

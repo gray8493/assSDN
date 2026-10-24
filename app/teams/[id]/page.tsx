@@ -24,6 +24,7 @@ import {
 import ChatPanel from "@/components/ChatPanel";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { TEAM_CHANNEL, EVENTS } from "@/lib/channels";
+import { History, Zap } from "lucide-react";
 import {
   can,
   canModifyTask,
@@ -47,6 +48,107 @@ interface TeamMember {
     name: string;
     email: string;
   };
+}
+
+interface ActivityItem {
+  id: string;
+  action: string;
+  detail: string | null;
+  createdAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+}
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  TEAM_UPDATED: "Team updated",
+  MEMBER_ADDED: "Member added",
+  MEMBER_REMOVED: "Member removed",
+  ROLE_CHANGED: "Role changed",
+  TASK_CREATED: "Task created",
+  TASK_UPDATED: "Task updated",
+  TASK_DELETED: "Task deleted",
+};
+
+function ActivitySection({ teamId }: { teamId: string }) {
+  const [activities, setActivities] = useState<ActivityItem[] | null>(null);
+  const [error, setError] = useState("");
+
+  const load = async () => {
+    try {
+      const res = await fetch(`/api/teams/${teamId}/activity`);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to load activity");
+      }
+      const data = await res.json();
+      setActivities(data.activities || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error loading activity");
+      setActivities([]);
+    }
+  };
+
+  const handleToggle = (e: React.ToggleEvent<HTMLDetailsElement>) => {
+    if (e.currentTarget.open && activities === null) load();
+  };
+
+  return (
+    <details
+      onToggle={handleToggle}
+      className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
+    >
+      <summary className="flex items-center gap-2 px-5 py-4 cursor-pointer list-none">
+        <History className="w-4 h-4 text-slate-400" />
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+          Recent Activity
+        </span>
+        <span className="text-[10px] text-slate-400 ml-auto">
+          Audit trail (last 50)
+        </span>
+      </summary>
+
+      <div className="px-5 pb-5 max-h-80 overflow-y-auto">
+        {error ? (
+          <p className="text-xs text-rose-500">{error}</p>
+        ) : activities === null ? (
+          <p className="text-xs text-slate-400 py-3">Loading activity...</p>
+        ) : activities.length === 0 ? (
+          <p className="text-xs text-slate-400 py-3">
+            No activity recorded yet.
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            {activities.map((a) => (
+              <li key={a.id} className="flex items-start gap-3 py-2.5 text-xs">
+                <span className="mt-1 flex items-center">
+                  <Zap className="w-3 h-3 text-amber-500" />
+                </span>
+                <span className="min-w-0">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {a.user?.name ?? "System"}
+                  </span>
+                  <span className="text-slate-400 ml-1.5">
+                    {ACTIVITY_LABELS[a.action] ?? a.action}
+                  </span>
+                  {a.detail && (
+                    <span className="text-slate-500 dark:text-slate-300 ml-1">
+                      – {a.detail}
+                    </span>
+                  )}
+                  <span className="block text-[10px] text-slate-400 mt-0.5">
+                    {new Date(a.createdAt).toLocaleString()}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </details>
+  );
 }
 
 interface TaskItem {
@@ -792,7 +894,16 @@ export default function TeamDetailPage({
       </div>
 
       {/* Team Chat (live) */}
-      {user && <ChatPanel teamId={teamId} currentUserId={user.id} />}
+      {user && (
+        <ChatPanel
+          teamId={teamId}
+          currentUserId={user.id}
+          currentUserName={user.name}
+        />
+      )}
+
+      {/* Bonus: audit trail */}
+      <ActivitySection teamId={teamId} />
 
       {/* Filter, Search & View Toggle Toolbar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">

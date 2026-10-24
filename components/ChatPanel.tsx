@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { MessagesSquare, Send, Loader2, AlertCircle } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
-import { TEAM_CHANNEL } from "@/lib/channels";
+import { TEAM_CHANNEL, EVENTS } from "@/lib/channels";
 interface ChatMessage {
   id: string;
   content: string;
@@ -26,7 +26,12 @@ interface ChatMessage {
 interface ChatPanelProps {
   teamId: string;
   currentUserId: string;
+  currentUserName: string;
 }
+
+type LiveChannel = ReturnType<
+  NonNullable<ReturnType<typeof getSupabaseBrowserClient>>["channel"]
+>;
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {
@@ -45,7 +50,11 @@ function formatDay(iso: string): string {
   return d.toLocaleDateString();
 }
 
-export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
+export default function ChatPanel({
+  teamId,
+  currentUserId,
+  currentUserName,
+}: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -53,9 +62,13 @@ export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const lastTypingSentRef = useRef(0);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const liveChannelRef = useRef<LiveChannel | null>(null);
 
   const scrollToBottom = useCallback((smooth = true) => {
     const el = scrollContainerRef.current;
@@ -115,8 +128,10 @@ export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
     }
 
     const channel = supabase
-      .channel(TEAM_CHANNEL(teamId))
-      .on("broadcast", { event: "message.new" }, ({ payload }) => {
+      .channel(TEAM_CHANNEL(teamId), {
+        config: { presence: { key: currentUserId } },
+      })
+      .on("broadcast", { event: EVENTS.MESSAGE_NEW }, ({ payload }) => {
         const message = payload as ChatMessage | undefined;
         if (!message?.id) return;
         // Do not scroll-fetch: just append (dedupe by id)
@@ -127,13 +142,65 @@ export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
           requestAnimationFrame(() => scrollToBottom(false));
         }
       })
-      .subscribe();
+      // Typing indicator broadcasts from peers (client-side)
+      .on("broadcast", { event: EVENTS.TYPING }, ({ payload }) => {
+        const { userId, name, isTyping } = (payload ?? {}) as {
+          userId?: string;
+          name?: string;
+          isTyping?: boolean;
+        };
+        if (!userId || userId === currentUserId || !name) return;
+        setTypingUsers((prev) => {
+          const rest = prev.filter((n) => n !== name);
+          if (!isTyping) return rest;
+          const next = [...rest, name];
+          // auto-clear this typing hint shortly
+          setTimeout(() => {
+            setTypingUsers((cur) => cur.filter((n) => n !== name));
+          }, 2500);
+          return next;
+        });
+      })
+      // Bonus: presence (online members)
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        const ids = Object.keys(state);
+        setOnlineUsers(ids);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          liveChannelRef.current = channel;
+          channel.track({ name: currentUserName, online_at: new Date().toISOString() });
+        }
+      });
 
     return () => {
       cancelled = true;
+      liveChannelRef.current = null;
       supabase.removeChannel(channel);
     };
-  }, [teamId, appendMessages, scrollToBottom]);
+  }, [teamId, appendMessages, scrollToBottom, currentUserId, currentUserName]);
+
+  /** Typing indicator: throttle-broadcast typing state while writing */
+  const handleTyping = () => {
+    const channel = liveChannelRef.current;
+    if (!channel) return;
+    const now = Date.now();
+    // max ~1 every 1.5s
+    if (now - lastTypingSentRef.current < 1500) return;
+    lastTypingSentRef.current = now;
+    channel
+      .send({
+        type: "broadcast",
+        event: EVENTS.TYPING,
+        payload: {
+          userId: currentUserId,
+          name: currentUserName,
+          isTyping: true,
+        },
+      })
+      .catch(() => undefined);
+  };
 
   /** Send message: optimistic echo is handled by dedupe when POST resolves */
   const handleSend = async (e: React.FormEvent) => {
@@ -217,10 +284,30 @@ export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
             Live
           </span>
         </div>
-        <span className="text-[10px] text-slate-400">
-          {messages.length} message{messages.length === 1 ? "" : "s"}
-        </span>
+        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+          {onlineUsers.length > 0 && (
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800"
+              title={`${Math.max(onlineUsers.length - 1, 0)} other member(s) online`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {onlineUsers.length} online
+            </span>
+          )}
+          <span>
+            {messages.length} message{messages.length === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
+
+      {typingUsers.length > 0 && (
+        <div className="px-5 py-1.5 text-[10px] text-indigo-600 dark:text-indigo-400 border-b border-slate-100 dark:border-slate-800">
+          <span className="animate-pulse">
+            {typingUsers.join(", ")}{" "}
+            {typingUsers.length === 1 ? "is" : "are"} typing…
+          </span>
+        </div>
+      )}
 
       {/* Messages */}
       <div
@@ -335,7 +422,10 @@ export default function ChatPanel({ teamId, currentUserId }: ChatPanelProps) {
           ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            handleTyping();
+          }}
           maxLength={2000}
           placeholder="Type a message to your team..."
           className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"

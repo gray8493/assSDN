@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { loadTeamAccess } from "@/lib/teamAccess";
 import { can } from "@/lib/permissions";
 import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
+import { logActivity, ACTIVITY_ACTIONS } from "@/lib/activityLog";
 
 // GET /api/teams/:id/members – List team members
 export async function GET(
@@ -145,6 +146,15 @@ export async function POST(
         refId: teamId,
       });
     }
+
+    logActivity({
+      teamId,
+      userId: authUser.id,
+      action: ACTIVITY_ACTIONS.MEMBER_ADDED,
+      targetType: "MEMBER",
+      targetId: targetUser.id,
+      detail: `added ${targetUser.name} as ${memberRole.toLowerCase()}`,
+    });
 
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
