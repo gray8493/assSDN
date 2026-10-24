@@ -22,8 +22,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ChatPanel from "@/components/ChatPanel";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
-import { TEAM_CHANNEL, EVENTS } from "@/lib/channels";
+import {
+  acquireTeamChannel,
+  releaseTeamChannel,
+} from "@/lib/teamChannel";
+import { EVENTS } from "@/lib/channels";
 import { History, Zap } from "lucide-react";
 import {
   can,
@@ -282,8 +285,8 @@ export default function TeamDetailPage({
   // ---- Realtime task board subscription ----
   useEffect(() => {
     if (!teamId) return;
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
+    const channel = acquireTeamChannel(teamId);
+    if (!channel) return;
 
     // "task.created"/"task.updated" payloads carry the full task object
     const applyUpsert = (task: TaskItem) => {
@@ -301,8 +304,7 @@ export default function TeamDetailPage({
       setTasks((prev) => prev.filter((t) => t.id !== ref.id));
     };
 
-    const channel = supabase
-      .channel(TEAM_CHANNEL(teamId))
+    channel
       .on("broadcast", { event: EVENTS.TASK_CREATED }, ({ payload }) =>
         applyUpsert(payload as TaskItem)
       )
@@ -311,11 +313,11 @@ export default function TeamDetailPage({
       )
       .on("broadcast", { event: EVENTS.TASK_DELETED }, ({ payload }) =>
         applyDelete(payload as { id?: string })
-      )
-      .subscribe();
+      );
+    // NOTE: no .subscribe() here – ChatPanel owns the single subscription.
 
     return () => {
-      supabase.removeChannel(channel);
+      releaseTeamChannel(teamId);
     };
   }, [teamId]);
 

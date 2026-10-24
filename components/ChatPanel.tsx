@@ -8,8 +8,16 @@ import React, {
   useState,
 } from "react";
 import { MessagesSquare, Send, Loader2, AlertCircle } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
-import { TEAM_CHANNEL, EVENTS } from "@/lib/channels";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import {
+  acquireTeamChannel,
+  addTeamPresenceListener,
+  ensureTeamChannelSubscribed,
+  releaseTeamChannel,
+  setTeamPresenceIdentity,
+  type PresenceMember,
+} from "@/lib/teamChannel";
+import { EVENTS } from "@/lib/channels";
 interface ChatMessage {
   id: string;
   content: string;
@@ -28,10 +36,6 @@ interface ChatPanelProps {
   currentUserId: string;
   currentUserName: string;
 }
-
-type LiveChannel = ReturnType<
-  NonNullable<ReturnType<typeof getSupabaseBrowserClient>>["channel"]
->;
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {
@@ -62,13 +66,13 @@ export default function ChatPanel({
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<PresenceMember[]>([]);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const lastTypingSentRef = useRef(0);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const liveChannelRef = useRef<LiveChannel | null>(null);
+  const liveChannelRef = useRef<RealtimeChannel | null>(null);
 
   const scrollToBottom = useCallback((smooth = true) => {
     const el = scrollContainerRef.current;
@@ -119,18 +123,23 @@ export default function ChatPanel({
 
     load();
 
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
-      setError("Realtime unavailable: missing Supabase configuration");
+    const channel = acquireTeamChannel(teamId);
+    if (!channel) {
+      if (!cancelled) {
+        setError("Realtime unavailable: missing Supabase configuration");
+      }
       return () => {
         cancelled = true;
       };
     }
 
-    const channel = supabase
-      .channel(TEAM_CHANNEL(teamId), {
-        config: { presence: { key: currentUserId } },
-      })
+    liveChannelRef.current = channel;
+
+    const removePresence = addTeamPresenceListener(teamId, (members: PresenceMember[]) => {
+      setOnlineUsers(members);
+    });
+
+    channel
       .on("broadcast", { event: EVENTS.MESSAGE_NEW }, ({ payload }) => {
         const message = payload as ChatMessage | undefined;
         if (!message?.id) return;
@@ -160,24 +169,19 @@ export default function ChatPanel({
           }, 2500);
           return next;
         });
-      })
-      // Bonus: presence (online members)
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        const ids = Object.keys(state);
-        setOnlineUsers(ids);
-      })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          liveChannelRef.current = channel;
-          channel.track({ name: currentUserName, online_at: new Date().toISOString() });
-        }
       });
+
+    ensureTeamChannelSubscribed(teamId);
+    setTeamPresenceIdentity(teamId, {
+      userId: currentUserId,
+      name: currentUserName,
+    });
 
     return () => {
       cancelled = true;
       liveChannelRef.current = null;
-      supabase.removeChannel(channel);
+      removePresence();
+      releaseTeamChannel(teamId);
     };
   }, [teamId, appendMessages, scrollToBottom, currentUserId, currentUserName]);
 
