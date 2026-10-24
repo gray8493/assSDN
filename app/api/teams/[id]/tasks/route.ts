@@ -160,13 +160,15 @@ export async function POST(
     );
 
     if (newTask.assigneeId) {
-      notifyTaskAssigned({
+      // Persist + broadcast notification BEFORE responding (deterministic;
+      // failures never break the main operation)
+      await notifyTaskAssigned({
         assigneeId: newTask.assigneeId,
         actorId: authUser.id,
         actorName: authUser.name,
         taskTitle: newTask.title,
         teamId,
-      }).catch(() => undefined);
+      });
     }
 
     return NextResponse.json(newTask, { status: 201 });

@@ -19,23 +19,29 @@ export interface CreateNotificationInput {
 }
 
 export async function createNotification(input: CreateNotificationInput) {
-  const notification = await prisma.notification.create({
-    data: {
-      userId: input.userId,
-      type: input.type,
-      message: input.message,
-      link: input.link ?? null,
-      refId: input.refId ?? null,
-    },
-  });
+  try {
+    const notification = await prisma.notification.create({
+      data: {
+        userId: input.userId,
+        type: input.type,
+        message: input.message,
+        link: input.link ?? null,
+        refId: input.refId ?? null,
+      },
+    });
 
-  // Live push so the bell badge increments without refresh.
-  broadcastEvent(USER_CHANNEL(input.userId), "notification.new", {
-    ...notification,
-    createdAt: notification.createdAt.toISOString(),
-  }).catch(() => undefined);
+    // Live push so the bell badge increments without refresh.
+    broadcastEvent(USER_CHANNEL(input.userId), "notification.new", {
+      ...notification,
+      createdAt: notification.createdAt.toISOString(),
+    }).catch(() => undefined);
 
-  return notification;
+    return notification;
+  } catch (error) {
+    // Notifications must never break the main DB operation
+    console.error("createNotification failed:", error);
+    return null;
+  }
 }
 
 /** TASK_ASSIGNED convenience wrapper (no self-notification) */

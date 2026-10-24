@@ -141,13 +141,13 @@ export async function POST(request: Request) {
     });
 
     if (newTask.assigneeId) {
-      notifyTaskAssigned({
+      await notifyTaskAssigned({
         assigneeId: newTask.assigneeId,
         actorId: authUser.id,
         actorName: authUser.name,
         taskTitle: newTask.title,
         teamId: newTask.teamId,
-      }).catch(() => undefined);
+      });
     }
 
     return NextResponse.json(newTask, { status: 201 });

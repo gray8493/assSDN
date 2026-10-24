@@ -160,13 +160,13 @@ export async function PUT(
 
     // Notify when the task got a (new) assignee, not for self-assignment
     if (updatedTask.assigneeId && updatedTask.assigneeId !== previousAssigneeId) {
-      notifyTaskAssigned({
+      await notifyTaskAssigned({
         assigneeId: updatedTask.assigneeId,
         actorId: authUser.id,
         actorName: authUser.name,
         taskTitle: updatedTask.title,
         teamId: updatedTask.teamId,
-      }).catch(() => undefined);
+      });
     }
 
     return NextResponse.json(updatedTask);

@@ -3,24 +3,43 @@ const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
-async function main() {
-  const email = "test@example.com";
-  const hashedPassword = await bcrypt.hash("Password123!", 10);
+// Two verified test accounts in the SAME team for grading/demos:
+//   test@example.com      – OWNER of the demo team
+//   member@example.com    – MEMBER of the demo team
+// Password for both: Password123!
+// Custom-JWT auth has no email verification step, so both log in directly.
+const OWNER_EMAIL = "test@example.com";
+const MEMBER_EMAIL = "member@example.com";
+const PASSWORD = "Password123!";
 
-  const user = await prisma.user.upsert({
-    where: { email },
+async function main() {
+  const hashedPassword = await bcrypt.hash(PASSWORD, 10);
+
+  const owner = await prisma.user.upsert({
+    where: { email: OWNER_EMAIL },
     update: { password: hashedPassword },
     create: {
       name: "Test Grader",
-      email,
+      email: OWNER_EMAIL,
       password: hashedPassword,
     },
   });
+  console.log("Seeded test user (owner):", owner.email);
 
-  console.log("Seeded test user:", user.email, "(ID:", user.id, ")");
+  const member = await prisma.user.upsert({
+    where: { email: MEMBER_EMAIL },
+    update: { password: hashedPassword },
+    create: {
+      name: "Demo Member",
+      email: MEMBER_EMAIL,
+      password: hashedPassword,
+    },
+  });
+  console.log("Seeded test user (member):", member.email);
 
   const existingTeam = await prisma.team.findFirst({
-    where: { ownerId: user.id },
+    where: { OR: [{ ownerId: owner.id }, { members: { some: { userId: owner.id } } }] },
+    include: { members: true },
   });
 
   if (!existingTeam) {
@@ -29,14 +48,15 @@ async function main() {
         name: "Alpha Engineering Squad",
         description:
           "Core product engineering team managing sprint deliverables and infrastructure.",
-        ownerId: user.id,
+        ownerId: owner.id,
         members: {
-          create: {
-            userId: user.id,
-            role: "OWNER",
-          },
+          create: [
+            { userId: owner.id, role: "OWNER" },
+            { userId: member.id, role: "MEMBER" },
+          ],
         },
       },
+      include: { members: true },
     });
 
     console.log("Created test team:", team.name);
@@ -50,8 +70,8 @@ async function main() {
           status: "DONE",
           priority: "HIGH",
           teamId: team.id,
-          creatorId: user.id,
-          assigneeId: user.id,
+          creatorId: owner.id,
+          assigneeId: owner.id,
         },
         {
           title: "Design Kanban Board UI",
@@ -60,8 +80,8 @@ async function main() {
           status: "IN_PROGRESS",
           priority: "MEDIUM",
           teamId: team.id,
-          creatorId: user.id,
-          assigneeId: user.id,
+          creatorId: owner.id,
+          assigneeId: owner.id,
         },
         {
           title: "Deploy to Vercel & Supabase",
@@ -70,8 +90,8 @@ async function main() {
           status: "TODO",
           priority: "HIGH",
           teamId: team.id,
-          creatorId: user.id,
-          assigneeId: user.id,
+          creatorId: owner.id,
+          assigneeId: member.id,
         },
       ],
     });
@@ -79,6 +99,17 @@ async function main() {
     console.log("Created 3 initial tasks for team:", team.name);
   } else {
     console.log("Test team already exists:", existingTeam.name);
+
+    const teamId = existingTeam.id;
+    const hasMembership = existingTeam.members.some((m) => m.userId === member.id);
+    if (!hasMembership) {
+      await prisma.teamMember.create({
+        data: { teamId, userId: member.id, role: "MEMBER" },
+      });
+      console.log("Added member account to existing team as MEMBER");
+    } else {
+      console.log("Member account is already in the team");
+    }
   }
 }
 

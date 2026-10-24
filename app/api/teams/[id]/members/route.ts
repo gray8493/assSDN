@@ -137,13 +137,13 @@ export async function POST(
 
     // Notify the added user (never notify the actor themselves)
     if (targetUser.id !== authUser.id) {
-      createNotification({
+      await createNotification({
         userId: targetUser.id,
         type: NOTIFICATION_TYPES.TEAM_ADDED,
         message: `${access.team.name}: You were added to the team as ${memberRole.toLowerCase()}`,
         link: `/teams/${teamId}`,
         refId: teamId,
-      }).catch(() => undefined);
+      });
     }
 
     return NextResponse.json(newMember, { status: 201 });

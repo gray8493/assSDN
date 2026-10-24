@@ -1,0 +1,991 @@
+
+> ass1@0.1.0 dev
+> next dev -p 3005
+
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://localhost:3005
+- Network:       http://192.168.3.26:3005
+- Environments: .env
+✓ Ready in 560ms
+✓ Running next.config.ts took 28ms
+
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 896ms (next.js: 151ms, application-code: 745ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 308ms (next.js: 4ms, application-code: 304ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."User" ("id","name","email","password","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt"
+prisma:query COMMIT
+ POST /api/auth/register 201 in 586ms (next.js: 35ms, application-code: 551ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 546ms (next.js: 30ms, application-code: 516ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 511ms (next.js: 3ms, application-code: 508ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/auth/me 200 in 278ms (next.js: 42ms, application-code: 236ms)
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 401 in 846ms (next.js: 833ms, application-code: 13ms)
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 401 in 1029ms (next.js: 1018ms, application-code: 11ms)
+ GET /api/notifications 401 in 284ms (next.js: 264ms, application-code: 20ms)
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 401 in 712ms (next.js: 702ms, application-code: 9ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) ORDER BY "public"."TeamMember"."joinedAt" ASC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" IN ($1) ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 403 in 826ms (next.js: 7ms, application-code: 819ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 355ms (next.js: 7ms, application-code: 348ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 338ms (next.js: 3ms, application-code: 335ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 343ms (next.js: 7ms, application-code: 337ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 332ms (next.js: 4ms, application-code: 328ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s 403 in 335ms (next.js: 9ms, application-code: 326ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s 403 in 323ms (next.js: 2ms, application-code: 321ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/members 403 in 1186ms (next.js: 825ms, application-code: 361ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 1080ms (next.js: 725ms, application-code: 355ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 349ms (next.js: 7ms, application-code: 341ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" = $1 ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/tasks 200 in 817ms (next.js: 7ms, application-code: 810ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 1580ms (next.js: 771ms, application-code: 809ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 778ms (next.js: 13ms, application-code: 765ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/tasks/cmunrjm2v0007uses95867ecy 403 in 735ms (next.js: 7ms, application-code: 728ms)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 374ms (next.js: 7ms, application-code: 367ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 843ms (next.js: 3ms, application-code: 840ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvlxvkeo0001usykhq6ovfdf 403 in 333ms (next.js: 7ms, application-code: 326ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 323ms (next.js: 3ms, application-code: 321ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/members 403 in 328ms (next.js: 8ms, application-code: 320ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvlxx4610000us0gf5gux9g3 403 in 337ms (next.js: 8ms, application-code: 329ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 388ms (next.js: 3ms, application-code: 384ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 329ms (next.js: 3ms, application-code: 326ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s 403 in 356ms (next.js: 7ms, application-code: 349ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 766ms (next.js: 9ms, application-code: 757ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 754ms (next.js: 7ms, application-code: 747ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvlxx4610000us0gf5gux9g3 403 in 359ms (next.js: 7ms, application-code: 352ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."teamId" = $1 ORDER BY "public"."Message"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages?limit=50 200 in 578ms (next.js: 11ms, application-code: 567ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Message" ("id","content","teamId","senderId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."Message"."id"
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 201 in 758ms (next.js: 3ms, application-code: 755ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."teamId" = $1 ORDER BY "public"."Message"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages?limit=50 200 in 643ms (next.js: 7ms, application-code: 635ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 400 in 333ms (next.js: 3ms, application-code: 330ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 400 in 335ms (next.js: 10ms, application-code: 325ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+ GET /api/notifications 200 in 602ms (next.js: 5ms, application-code: 597ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 370ms (next.js: 13ms, application-code: 357ms)
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query COMMIT
+ GET /api/notifications 200 in 247ms (next.js: 5ms, application-code: 243ms)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 383ms (next.js: 11ms, application-code: 372ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 317ms (next.js: 2ms, application-code: 315ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 532ms (next.js: 6ms, application-code: 525ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/auth/me 200 in 243ms (next.js: 4ms, application-code: 240ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/auth/me 200 in 251ms (next.js: 6ms, application-code: 245ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvlxvkeo0001usykhq6ovfdf 403 in 362ms (next.js: 7ms, application-code: 355ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" = $1 ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/tasks 200 in 785ms (next.js: 8ms, application-code: 777ms)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 356ms (next.js: 2ms, application-code: 354ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 309ms (next.js: 3ms, application-code: 306ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."User" ("id","name","email","password","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt"
+prisma:query COMMIT
+ POST /api/auth/register 201 in 541ms (next.js: 4ms, application-code: 537ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 2.6s (next.js: 2ms, application-code: 2.5s)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 1245ms (next.js: 3ms, application-code: 1243ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/auth/me 200 in 237ms (next.js: 6ms, application-code: 232ms)
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 401 in 30ms (next.js: 11ms, application-code: 19ms)
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 401 in 35ms (next.js: 8ms, application-code: 27ms)
+ GET /api/notifications 401 in 14ms (next.js: 4ms, application-code: 10ms)
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 401 in 21ms (next.js: 8ms, application-code: 14ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) ORDER BY "public"."TeamMember"."joinedAt" ASC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" IN ($1) ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 403 in 789ms (next.js: 4ms, application-code: 785ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 330ms (next.js: 7ms, application-code: 323ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 337ms (next.js: 4ms, application-code: 333ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 335ms (next.js: 10ms, application-code: 326ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 329ms (next.js: 2ms, application-code: 326ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s 403 in 356ms (next.js: 14ms, application-code: 341ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s 403 in 328ms (next.js: 5ms, application-code: 322ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/members 403 in 342ms (next.js: 10ms, application-code: 332ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 408ms (next.js: 7ms, application-code: 402ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 373ms (next.js: 3ms, application-code: 371ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" = $1 ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/tasks 200 in 843ms (next.js: 9ms, application-code: 834ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 771ms (next.js: 9ms, application-code: 762ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 744ms (next.js: 8ms, application-code: 736ms)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 344ms (next.js: 3ms, application-code: 342ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ POST /api/auth/login 200 in 296ms (next.js: 2ms, application-code: 294ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."User" ("id","name","email","password","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt"
+prisma:query COMMIT
+ POST /api/auth/register 201 in 542ms (next.js: 4ms, application-code: 537ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 509ms (next.js: 3ms, application-code: 506ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt", COALESCE("aggr_selection_0_Task"."_aggr_count_tasks", 0) AS "_aggr_count_tasks", COALESCE("aggr_selection_1_TeamMember"."_aggr_count_members", 0) AS "_aggr_count_members" FROM "public"."Team" LEFT JOIN (SELECT "public"."Task"."teamId", COUNT(*) AS "_aggr_count_tasks" FROM "public"."Task" WHERE 1=1 GROUP BY "public"."Task"."teamId") AS "aggr_selection_0_Task" ON ("public"."Team"."id" = "aggr_selection_0_Task"."teamId") LEFT JOIN (SELECT "public"."TeamMember"."teamId", COUNT(*) AS "_aggr_count_members" FROM "public"."TeamMember" WHERE 1=1 GROUP BY "public"."TeamMember"."teamId") AS "aggr_selection_1_TeamMember" ON ("public"."Team"."id" = "aggr_selection_1_TeamMember"."teamId") WHERE ("public"."Team"."ownerId" = $1 OR EXISTS(SELECT "t0"."teamId" FROM "public"."TeamMember" AS "t0" WHERE ("t0"."userId" = $2 AND ("public"."Team"."id") = ("t0"."teamId") AND "t0"."teamId" IS NOT NULL))) ORDER BY "public"."Team"."createdAt" DESC OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query COMMIT
+ GET /api/teams 200 in 548ms (next.js: 2ms, application-code: 546ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/auth/me 200 in 236ms (next.js: 3ms, application-code: 233ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 835ms (next.js: 6ms, application-code: 828ms)
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 401 in 15ms (next.js: 7ms, application-code: 8ms)
+prisma:query BEGIN
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 401 in 16ms (next.js: 9ms, application-code: 6ms)
+ GET /api/notifications 401 in 15ms (next.js: 6ms, application-code: 9ms)
+prisma:query DEALLOCATE ALL
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 401 in 20ms (next.js: 8ms, application-code: 12ms)
+prisma:query SELECT 1
+prisma:query INSERT INTO "public"."Notification" ("id","userId","type","message","link","refId","read","createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt"
+prisma:query BEGIN
+prisma:query COMMIT
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) ORDER BY "public"."TeamMember"."joinedAt" ASC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" IN ($1) ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s 403 in 842ms (next.js: 4ms, application-code: 838ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 340ms (next.js: 11ms, application-code: 329ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 403 in 335ms (next.js: 4ms, application-code: 331ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 337ms (next.js: 8ms, application-code: 329ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 341ms (next.js: 3ms, application-code: 338ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s 403 in 350ms (next.js: 11ms, application-code: 339ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s 403 in 333ms (next.js: 3ms, application-code: 330ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/members 403 in 342ms (next.js: 8ms, application-code: 333ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 338ms (next.js: 6ms, application-code: 332ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 331ms (next.js: 3ms, application-code: 329ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."teamId" = $1 ORDER BY "public"."Task"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/tasks 200 in 758ms (next.js: 7ms, application-code: 751ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 754ms (next.js: 7ms, application-code: 747ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/tasks/cmunrjm2v0005usesufcs1xi0 403 in 760ms (next.js: 8ms, application-code: 752ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query UPDATE "public"."Task" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."Task"."id" = $3 AND 1=1) RETURNING "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/tasks/cmvly03bw000aus0gxco9npjc 200 in 1293ms (next.js: 7ms, application-code: 1285ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 403 in 346ms (next.js: 8ms, application-code: 338ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 874ms (next.js: 3ms, application-code: 872ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query UPDATE "public"."TeamMember" SET "role" = CAST($1::text AS "public"."Role") WHERE ("public"."TeamMember"."id" = $2 AND 1=1) RETURNING "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt"
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvlxvkeo0001usykhq6ovfdf 200 in 778ms (next.js: 7ms, application-code: 771ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."TeamMember"."id" FROM "public"."TeamMember" WHERE ("public"."TeamMember"."teamId" = $1 AND "public"."TeamMember"."role" = CAST($2::text AS "public"."Role")) OFFSET $3) AS "sub"
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 582ms (next.js: 7ms, application-code: 576ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."password", "public"."User"."createdAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE (("public"."TeamMember"."teamId" = $1 AND "public"."TeamMember"."userId" = $2) AND 1=1) LIMIT $3 OFFSET $4
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."TeamMember" ("id","teamId","userId","role","joinedAt") VALUES ($1,$2,$3,CAST($4::text AS "public"."Role"),$5) RETURNING "public"."TeamMember"."id"
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt" FROM "public"."TeamMember" WHERE "public"."TeamMember"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/members 201 in 1247ms (next.js: 8ms, application-code: 1239ms)
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Notification" ("id","userId","type","message","link","refId","read","createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt"
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvly01vj0008us0ge487sx2o 403 in 338ms (next.js: 10ms, application-code: 328ms)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."TeamMember"."id" FROM "public"."TeamMember" WHERE ("public"."TeamMember"."teamId" = $1 AND "public"."TeamMember"."role" = CAST($2::text AS "public"."Role")) OFFSET $3) AS "sub"
+prisma:query COMMIT
+ PUT /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 618ms (next.js: 3ms, application-code: 615ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmunrjl940000uses2b35f0mg 403 in 329ms (next.js: 6ms, application-code: 323ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s 403 in 334ms (next.js: 7ms, application-code: 327ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 767ms (next.js: 7ms, application-code: 761ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DELETE FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) RETURNING "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt"
+prisma:query COMMIT
+ DELETE /api/tasks/cmunrjm2v0005usesufcs1xi0 200 in 1019ms (next.js: 9ms, application-code: 1010ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DELETE FROM "public"."TeamMember" WHERE ("public"."TeamMember"."id" = $1 AND 1=1) RETURNING "public"."TeamMember"."id", "public"."TeamMember"."teamId", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."joinedAt"
+prisma:query COMMIT
+ DELETE /api/teams/cmunrjlp40002usesk1w8u49s/members/cmvly01vj0008us0ge487sx2o 200 in 571ms (next.js: 7ms, application-code: 565ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."teamId" = $1 ORDER BY "public"."Message"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages?limit=50 200 in 669ms (next.js: 7ms, application-code: 661ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Message" ("id","content","teamId","senderId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."Message"."id"
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 201 in 758ms (next.js: 6ms, application-code: 752ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."teamId" = $1 ORDER BY "public"."Message"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/teams/cmunrjlp40002usesk1w8u49s/messages?limit=50 200 in 688ms (next.js: 7ms, application-code: 681ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 400 in 331ms (next.js: 3ms, application-code: 328ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 400 in 350ms (next.js: 8ms, application-code: 342ms)
+prisma:query BEGIN
+prisma:query SELECT 1
+prisma:query DEALLOCATE ALL
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+ GET /api/notifications 200 in 298ms (next.js: 3ms, application-code: 295ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 861ms (next.js: 9ms, application-code: 852ms)
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Notification" ("id","userId","type","message","link","refId","read","createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt"
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+ GET /api/notifications 200 in 746ms (next.js: 3ms, application-code: 743ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId" FROM "public"."Notification" WHERE ("public"."Notification"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query UPDATE "public"."Notification" SET "read" = $1 WHERE ("public"."Notification"."id" = $2 AND 1=1) RETURNING "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt"
+prisma:query COMMIT
+ PATCH /api/notifications/cmvly03pt000cus0g4kbzv588 200 in 1687ms (next.js: 1037ms, application-code: 649ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query UPDATE "public"."Notification" SET "read" = $1 WHERE ("public"."Notification"."userId" = $2 AND "public"."Notification"."read" = $3)
+prisma:query COMMIT
+ POST /api/notifications/read-all 200 in 532ms (next.js: 230ms, application-code: 302ms)
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/notifications 200 in 311ms (next.js: 4ms, application-code: 307ms)
+prisma:query BEGIN
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DEALLOCATE ALL
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."read" = $2) OFFSET $3) AS "sub"
+prisma:query COMMIT
+prisma:query SELECT "public"."Notification"."id", "public"."Notification"."userId", "public"."Notification"."type", "public"."Notification"."message", "public"."Notification"."link", "public"."Notification"."refId", "public"."Notification"."read", "public"."Notification"."createdAt" FROM "public"."Notification" WHERE "public"."Notification"."userId" = $1 ORDER BY "public"."Notification"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+ GET /api/notifications 200 in 301ms (next.js: 5ms, application-code: 296ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Message" ("id","content","teamId","senderId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."Message"."id"
+prisma:query SELECT "public"."Message"."id", "public"."Message"."content", "public"."Message"."teamId", "public"."Message"."senderId", "public"."Message"."createdAt" FROM "public"."Message" WHERE "public"."Message"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/messages 201 in 1024ms (next.js: 8ms, application-code: 1016ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query INSERT INTO "public"."Task" ("id","title","description","status","priority","dueDate","teamId","assigneeId","creatorId","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."Task"."id"
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE "public"."Task"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."User"."id", "public"."User"."name", "public"."User"."email" FROM "public"."User" WHERE "public"."User"."id" IN ($1) OFFSET $2
+prisma:query COMMIT
+ POST /api/teams/cmunrjlp40002usesk1w8u49s/tasks 201 in 948ms (next.js: 8ms, application-code: 940ms)
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt" FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE "public"."Team"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query SELECT "public"."Team"."id", "public"."Team"."name", "public"."Team"."description", "public"."Team"."ownerId", "public"."Team"."createdAt" FROM "public"."Team" WHERE ("public"."Team"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TeamMember"."id", "public"."TeamMember"."userId", "public"."TeamMember"."role"::text, "public"."TeamMember"."teamId" FROM "public"."TeamMember" WHERE "public"."TeamMember"."teamId" IN ($1) OFFSET $2
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query DEALLOCATE ALL
+prisma:query DELETE FROM "public"."Task" WHERE ("public"."Task"."id" = $1 AND 1=1) RETURNING "public"."Task"."id", "public"."Task"."title", "public"."Task"."description", "public"."Task"."status", "public"."Task"."priority", "public"."Task"."dueDate", "public"."Task"."teamId", "public"."Task"."assigneeId", "public"."Task"."creatorId", "public"."Task"."createdAt", "public"."Task"."updatedAt"
+prisma:query COMMIT
+ DELETE /api/tasks/cmvly0p6h000uus0gi0n5n8te 200 in 1254ms (next.js: 7ms, application-code: 1248ms)
