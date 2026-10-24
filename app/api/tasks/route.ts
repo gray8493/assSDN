@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { isRole, type Role } from "@/lib/permissions";
+import { notifyTaskAssigned } from "@/lib/notifications";
+
+const taskInclude = {
+  team: {
+    select: { id: true, name: true, ownerId: true },
+  },
+  assignee: {
+    select: { id: true, name: true, email: true },
+  },
+  creator: {
+    select: { id: true, name: true, email: true },
+  },
+} as const;
 
 // GET /api/tasks – List tasks for current user
 export async function GET(request: Request) {
@@ -29,17 +42,7 @@ export async function GET(request: Request) {
           },
         ],
       },
-      include: {
-        team: {
-          select: { id: true, name: true, ownerId: true },
-        },
-        assignee: {
-          select: { id: true, name: true, email: true },
-        },
-        creator: {
-          select: { id: true, name: true, email: true },
-        },
-      },
+      include: taskInclude,
       orderBy: { createdAt: "desc" },
     });
 
@@ -134,18 +137,18 @@ export async function POST(request: Request) {
         creatorId: authUser.id,
         assigneeId: assigneeId || null,
       },
-      include: {
-        team: {
-          select: { id: true, name: true, ownerId: true },
-        },
-        assignee: {
-          select: { id: true, name: true, email: true },
-        },
-        creator: {
-          select: { id: true, name: true, email: true },
-        },
-      },
+      include: taskInclude,
     });
+
+    if (newTask.assigneeId) {
+      notifyTaskAssigned({
+        assigneeId: newTask.assigneeId,
+        actorId: authUser.id,
+        actorName: authUser.name,
+        taskTitle: newTask.title,
+        teamId: newTask.teamId,
+      }).catch(() => undefined);
+    }
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
@@ -156,3 +159,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

@@ -5,6 +5,8 @@
 export const TEAM_CHANNEL = (teamId: string) => `team:${teamId}`;
 export const USER_CHANNEL = (userId: string) => `user:${userId}`;
 
+
+
 export const EVENTS = {
   // Chat
   MESSAGE_NEW: "message.new",

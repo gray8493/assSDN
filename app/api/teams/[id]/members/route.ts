@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { loadTeamAccess } from "@/lib/teamAccess";
 import { can } from "@/lib/permissions";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 // GET /api/teams/:id/members – List team members
 export async function GET(
@@ -133,6 +134,17 @@ export async function POST(
         },
       },
     });
+
+    // Notify the added user (never notify the actor themselves)
+    if (targetUser.id !== authUser.id) {
+      createNotification({
+        userId: targetUser.id,
+        type: NOTIFICATION_TYPES.TEAM_ADDED,
+        message: `${access.team.name}: You were added to the team as ${memberRole.toLowerCase()}`,
+        link: `/teams/${teamId}`,
+        refId: teamId,
+      }).catch(() => undefined);
+    }
 
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {

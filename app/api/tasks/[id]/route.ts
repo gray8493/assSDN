@@ -9,6 +9,7 @@ import {
   type Role,
 } from "@/lib/permissions";
 import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
+import { notifyTaskAssigned } from "@/lib/notifications";
 
 const taskInclude = {
   assignee: {
@@ -124,6 +125,8 @@ export async function PUT(
       }
     }
 
+    const previousAssigneeId = existingTask.assigneeId;
+
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
@@ -153,6 +156,17 @@ export async function PUT(
         EVENTS.TASK_UPDATED,
         updatedTask
       ).catch(() => undefined);
+    }
+
+    // Notify when the task got a (new) assignee, not for self-assignment
+    if (updatedTask.assigneeId && updatedTask.assigneeId !== previousAssigneeId) {
+      notifyTaskAssigned({
+        assigneeId: updatedTask.assigneeId,
+        actorId: authUser.id,
+        actorName: authUser.name,
+        taskTitle: updatedTask.title,
+        teamId: updatedTask.teamId,
+      }).catch(() => undefined);
     }
 
     return NextResponse.json(updatedTask);

@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { loadTeamAccess } from "@/lib/teamAccess";
 import { can, canAssignTo } from "@/lib/permissions";
 import { broadcastEvent, TEAM_CHANNEL, EVENTS } from "@/lib/realtime";
+import { notifyTaskAssigned } from "@/lib/notifications";
 
 // GET /api/teams/:id/tasks – List tasks for a team
 export async function GET(
@@ -157,6 +158,16 @@ export async function POST(
     broadcastEvent(TEAM_CHANNEL(teamId), EVENTS.TASK_CREATED, newTask).catch(
       () => undefined
     );
+
+    if (newTask.assigneeId) {
+      notifyTaskAssigned({
+        assigneeId: newTask.assigneeId,
+        actorId: authUser.id,
+        actorName: authUser.name,
+        taskTitle: newTask.title,
+        teamId,
+      }).catch(() => undefined);
+    }
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {

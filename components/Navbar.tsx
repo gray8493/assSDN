@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { CheckSquare, Users, LogIn, LogOut, UserPlus } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -60,6 +61,8 @@ export default function Navbar() {
               <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             ) : user ? (
               <div className="flex items-center gap-2 sm:gap-3">
+                <NotificationBell />
+
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700">
                   <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px]">
                     {user.name.charAt(0).toUpperCase()}
