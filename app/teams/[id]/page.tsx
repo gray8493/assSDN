@@ -21,11 +21,26 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import ChatPanel from "@/components/ChatPanel";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+import { TEAM_CHANNEL, EVENTS } from "@/lib/channels";
+import {
+  can,
+  canModifyTask,
+  canDeleteTask,
+  canAssignTo,
+  canRemoveMember,
+  canSetRole,
+  ROLES,
+  ROLE_CAPABILITIES,
+  isRole,
+  type Role,
+} from "@/lib/permissions";
 
 interface TeamMember {
   id: string;
   userId: string;
-  role: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
   joinedAt: string;
   user: {
     id: string;
@@ -72,6 +87,17 @@ interface TeamDetail {
   tasks: TaskItem[];
 }
 
+function roleBadgeClass(role: string): string {
+  switch (role) {
+    case "OWNER":
+      return "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300";
+    case "ADMIN":
+      return "bg-violet-100 dark:bg-violet-950/80 text-violet-700 dark:text-violet-300";
+    default:
+      return "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
+  }
+}
+
 export default function TeamDetailPage({
   params,
 }: {
@@ -88,6 +114,7 @@ export default function TeamDetailPage({
 
   // View state
   const [viewMode, setViewMode] = useState<"board" | "table">("board");
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
@@ -150,7 +177,58 @@ export default function TeamDetailPage({
     }
   }, [authLoading, user, fetchTeamDetails]);
 
-  const isOwner = user?.id === team?.ownerId;
+  // ---- Realtime task board subscription ----
+  useEffect(() => {
+    if (!teamId) return;
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    // "task.created"/"task.updated" payloads carry the full task object
+    const applyUpsert = (task: TaskItem) => {
+      if (!task?.id) return;
+      setTasks((prev) => {
+        const idx = prev.findIndex((t) => t.id === task.id);
+        if (idx === -1) return [task, ...prev];
+        const next = [...prev];
+        next[idx] = task;
+        return next;
+      });
+    };
+    const applyDelete = (ref: { id?: string }) => {
+      if (!ref?.id) return;
+      setTasks((prev) => prev.filter((t) => t.id !== ref.id));
+    };
+
+    const channel = supabase
+      .channel(TEAM_CHANNEL(teamId))
+      .on("broadcast", { event: EVENTS.TASK_CREATED }, ({ payload }) =>
+        applyUpsert(payload as TaskItem)
+      )
+      .on("broadcast", { event: EVENTS.TASK_UPDATED }, ({ payload }) =>
+        applyUpsert(payload as TaskItem)
+      )
+      .on("broadcast", { event: EVENTS.TASK_DELETED }, ({ payload }) =>
+        applyDelete(payload as { id?: string })
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [teamId]);
+
+  // ---- Derived role helpers for the current viewer ----
+  const myMembership = useMemo(
+    () => team?.members.find((m) => m.userId === user?.id) ?? null,
+    [team, user]
+  );
+  const myRole: Role | null = useMemo(() => {
+    if (!team || !user) return null;
+    if (myMembership && isRole(myMembership.role)) return myMembership.role;
+    if (team.ownerId === user.id) return "OWNER";
+    return null;
+  }, [team, user, myMembership]);
+  const isOwner = myRole === "OWNER";
 
   // Add Member
   const handleAddMember = async (e: React.FormEvent) => {
@@ -187,14 +265,27 @@ export default function TeamDetailPage({
     }
   };
 
-  // Remove Member
-  const handleRemoveMember = async (userId: string, memberName: string) => {
-    if (!confirm(`Are you sure you want to remove ${memberName} from this team?`)) {
+  // Remove Member (roles checked client-side via permissions; API enforces too)
+  const handleRemoveMember = async (member: TeamMember) => {
+    if (!myRole) return;
+    const check = canRemoveMember(
+      myRole,
+      isRole(member.role) ? member.role : "MEMBER",
+      member.userId === user?.id
+    );
+    if (!check.allowed) {
+      alert(check.reason || "You are not allowed to remove this member");
+      return;
+    }
+
+    if (
+      !confirm(`Are you sure you want to remove ${member.user.name} from this team?`)
+    ) {
       return;
     }
 
     try {
-      const res = await fetch(`/api/teams/${teamId}/members/${userId}`, {
+      const res = await fetch(`/api/teams/${teamId}/members/${member.userId}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -205,6 +296,40 @@ export default function TeamDetailPage({
       fetchTeamDetails();
     } catch {
       alert("Error removing member");
+    }
+  };
+
+  // Change member role (dropdown in member card)
+  const handleChangeRole = async (member: TeamMember, newRole: string) => {
+    if (!myRole || newRole === member.role) return;
+    const ownerCount = team
+      ? team.members.filter((m) => m.role === "OWNER").length
+      : 1;
+    const check = canSetRole(
+      myRole,
+      isRole(member.role) ? member.role : "MEMBER",
+      isRole(newRole) ? newRole : "MEMBER",
+      ownerCount
+    );
+    if (!check.allowed) {
+      alert(check.reason || "You are not allowed to change this role");
+      fetchTeamDetails(); // restore the select
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/teams/${teamId}/members/${member.userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Failed to change role");
+      }
+      fetchTeamDetails();
+    } catch {
+      alert("Error changing role");
     }
   };
 
@@ -331,17 +456,26 @@ export default function TeamDetailPage({
     }
   };
 
-  // Quick move status (Kanban move)
-  const handleStatusChange = async (taskId: string, newStatus: string) => {
+  // Quick move status (Kanban move). Server re-checks permission.
+  const handleStatusChange = async (task: TaskItem, newStatus: string) => {
+    if (!myRole || !canModifyTask(myRole, task, user?.id ?? "")) {
+      alert(
+        "Only the task creator, the assignee, Owners and Admins can move this task."
+      );
+      return;
+    }
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const res = await fetch(`/api/tasks/${task.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
         const updated = await res.json();
-        setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+        setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update task status");
       }
     } catch (err) {
       console.error("Status change error", err);
@@ -350,13 +484,10 @@ export default function TeamDetailPage({
 
   // Delete Task
   const handleDeleteTask = async (task: TaskItem) => {
-    const canDelete =
-      user?.id === task.creatorId ||
-      user?.id === task.assigneeId ||
-      user?.id === team?.ownerId;
-
-    if (!canDelete) {
-      alert("Only the task creator, assignee, or team owner can delete this task.");
+    if (!myRole || !canDeleteTask(myRole, task, user?.id ?? "")) {
+      alert(
+        "Only the task creator, the assignee, Owners and Admins can delete this task."
+      );
       return;
     }
 
@@ -445,7 +576,7 @@ export default function TeamDetailPage({
         </Link>
 
         <div className="flex items-center gap-2">
-          {isOwner && (
+          {myRole && can(myRole, "team.update") && (
             <button
               type="button"
               onClick={() => setShowEditTeam(true)}
@@ -475,17 +606,22 @@ export default function TeamDetailPage({
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 {team.name}
               </h1>
-              {isOwner ? (
+              {myRole === "OWNER" ? (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60">
                   <Shield className="w-3 h-3 text-amber-500" />
-                  <span>Team Owner</span>
+                  <span>Owner</span>
                 </span>
-              ) : (
+              ) : myRole === "ADMIN" ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200/60">
+                  <Shield className="w-3 h-3 text-violet-500" />
+                  <span>Admin</span>
+                </span>
+              ) : myRole ? (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60">
                   <UserCheck className="w-3 h-3 text-indigo-500" />
                   <span>Member</span>
                 </span>
-              )}
+              ) : null}
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
               {team.description || "No description provided for this team."}
@@ -513,7 +649,7 @@ export default function TeamDetailPage({
               )}
             </div>
 
-            {isOwner && (
+            {myRole && can(myRole, "member.add") && (
               <button
                 type="button"
                 onClick={() => setShowAddMember(true)}
@@ -526,64 +662,138 @@ export default function TeamDetailPage({
           </div>
         </div>
 
-        {/* Member Management Expandable / List Section */}
+        {/* Member Management Section */}
         <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
               <span>Team Members ({team.members.length})</span>
             </h3>
+            <details className="group relative">
+              <summary className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer list-none hover:underline">
+                Roles &amp; permissions
+              </summary>
+              <div className="absolute right-0 top-6 z-20 w-[280px] sm:w-[320px] p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl space-y-2.5 text-left">
+                {ROLE_CAPABILITIES.map(({ role: r, capabilities }) => (
+                  <div key={r}>
+                    <span
+                      className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded mb-1 ${roleBadgeClass(r)}`}
+                    >
+                      {r}
+                    </span>
+                    <ul className="space-y-0.5 text-[10px] text-slate-600 dark:text-slate-300">
+                      {capabilities.map((c) => (
+                        <li key={c} className="flex items-start gap-1.5">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-indigo-400 shrink-0" />
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {team.members.map((member) => {
-              const isMemberOwner = member.role === "OWNER" || member.userId === team.ownerId;
-              return (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center shrink-0">
-                      {member.user.name.charAt(0).toUpperCase()}
+              {team.members.map((member) => {
+                const memberRole = isRole(member.role) ? member.role : "MEMBER";
+                const ownerCount = team.members.filter(
+                  (m) => m.role === "OWNER"
+                ).length;
+                const roleOptions = ROLES.filter((r) => {
+                  if (r === memberRole) return false;
+                  return canSetRole(
+                    myRole,
+                    memberRole,
+                    r,
+                    ownerCount
+                  ).allowed;
+                });
+                const removeCheck = canRemoveMember(
+                  myRole,
+                  memberRole,
+                  member.userId === user?.id
+                );
+                const isManager = !!myRole && can(myRole, "member.role.update");
+
+                return (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center shrink-0">
+                        {member.user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="truncate">
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                          {member.user.name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 truncate">
+                          {member.user.email}
+                        </p>
+                      </div>
                     </div>
-                    <div className="truncate">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                        {member.user.name}
-                      </p>
-                      <p className="text-[10px] text-slate-500 truncate">{member.user.email}</p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${roleBadgeClass(memberRole)}`}>
+                        {memberRole}
+                      </span>
+
+                      {/* Role dropdown – only for allowed manager/target pairs.
+                          ADMIN sees MEMBER/ADMIN targets with MEMBER→ADMIN
+                          hidden (no OWNER grants). Options filtered by
+                          canSetRole (incl. last-owner guard). */}
+                      {isManager && roleOptions.length === 0 ? (
+                        <span
+                          className="text-[10px] text-slate-400 italic"
+                          title={
+                            memberRole === "OWNER"
+                              ? "Owner role is managed by the Owner"
+                              : undefined
+                          }
+                        >
+                          —
+                        </span>
+                      ) : null}
+                      {isManager && roleOptions.length > 0 ? (
+                        <select
+                          value={memberRole}
+                          onChange={(e) => handleChangeRole(member, e.target.value)}
+                          className="text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-1 py-0.5 font-semibold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+                          title="Change member role"
+                        >
+                          <option value={memberRole}>{memberRole}</option>
+                          {roleOptions.map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                      ) : null}
+
+                      {/* Remove member – only when allowed */}
+                      {removeCheck.allowed ? (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(member)}
+                          className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                          title="Remove member"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      ) : null}
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                        isMemberOwner
-                          ? "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300"
-                          : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      {member.role}
-                    </span>
-
-                    {/* Owner can remove members (except self) */}
-                    {isOwner && member.userId !== team.ownerId && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMember(member.userId, member.user.name)}
-                        className="text-slate-400 hover:text-rose-600 transition-colors p-1"
-                        title="Remove member"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                 );
+               })}
+            </div>
         </div>
       </div>
+
+      {/* Team Chat (live) */}
+      {user && <ChatPanel teamId={teamId} currentUserId={user.id} />}
 
       {/* Filter, Search & View Toggle Toolbar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -700,7 +910,25 @@ export default function TeamDetailPage({
             return (
               <div
                 key={col.status}
-                className="bg-slate-100/70 dark:bg-slate-900/40 rounded-3xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col min-h-[500px]"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (dragOverColumn !== col.status) setDragOverColumn(col.status);
+                }}
+                onDragLeave={() =>
+                  setDragOverColumn((prev) => (prev === col.status ? null : prev))
+                }
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverColumn(null);
+                  const taskId = e.dataTransfer.getData("text/task-id");
+                  if (!taskId) return;
+                  const task = tasks.find((t) => t.id === taskId);
+                  if (task && task.status !== col.status) {
+                    handleStatusChange(task, col.status);
+                  }
+                }}
+                className={`bg-slate-100/70 dark:bg-slate-900/40 rounded-3xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col min-h-[500px] ${dragOverColumn === col.status ? "border-indigo-400 ring-2 ring-indigo-300" : ""}`}
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
@@ -731,30 +959,39 @@ export default function TeamDetailPage({
                     </div>
                   ) : (
                     colTasks.map((task) => {
-                      const canDelete =
-                        user?.id === task.creatorId ||
-                        user?.id === task.assigneeId ||
-                        user?.id === team.ownerId;
+                      const canEdit = !!myRole && canModifyTask(myRole, task, user?.id ?? "");
+                      const canRemove =
+                        !!myRole && canDeleteTask(myRole, task, user?.id ?? "");
+                      const canMove = canEdit;
 
                       return (
                         <div
                           key={task.id}
-                          className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md transition-all space-y-3 group"
+                          draggable={canMove}
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData("text/task-id", task.id);
+                            e.dataTransfer.effectAllowed = "move";
+                          }}
+                          className={`bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md transition-all space-y-3 group ${
+                            canMove ? "cursor-grab active:cursor-grabbing" : ""
+                          }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
                               {task.title}
                             </h4>
                             <div className="flex items-center gap-1 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => openEditTaskModal(task)}
-                                className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
-                                title="Edit Task"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              {canDelete && (
+                              {canEdit ? (
+                                <button
+                                  type="button"
+                                  onClick={() => openEditTaskModal(task)}
+                                  className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                  title="Edit Task"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                              ) : null}
+                              {canRemove && (
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteTask(task)}
@@ -815,8 +1052,14 @@ export default function TeamDetailPage({
                             {/* Quick status dropdown */}
                             <select
                               value={task.status}
-                              onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                              className="text-[11px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-0.5 font-medium text-slate-700 dark:text-slate-300 focus:outline-none"
+                              disabled={!canMove}
+                              onChange={(e) => handleStatusChange(task, e.target.value)}
+                              className="text-[11px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-0.5 font-medium text-slate-700 dark:text-slate-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={
+                                canMove
+                                  ? "Move task"
+                                  : "Only the creator, assignee, Owner or Admin can move this task"
+                              }
                             >
                               <option value="TODO">To Do</option>
                               <option value="IN_PROGRESS">In Progress</option>
@@ -856,10 +1099,9 @@ export default function TeamDetailPage({
                   </tr>
                 ) : (
                   paginatedTasks.map((task) => {
-                    const canDelete =
-                      user?.id === task.creatorId ||
-                      user?.id === task.assigneeId ||
-                      user?.id === team.ownerId;
+                    const canEdit = !!myRole && canModifyTask(myRole, task, user?.id ?? "");
+                    const canRemove =
+                      !!myRole && canDeleteTask(myRole, task, user?.id ?? "");
 
                     return (
                       <tr
@@ -912,15 +1154,17 @@ export default function TeamDetailPage({
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEditTaskModal(task)}
-                              className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            {canDelete && (
+                            {canEdit ? (
+                              <button
+                                type="button"
+                                onClick={() => openEditTaskModal(task)}
+                                className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                            ) : null}
+                            {canRemove && (
                               <button
                                 type="button"
                                 onClick={() => handleDeleteTask(task)}
@@ -1061,12 +1305,23 @@ export default function TeamDetailPage({
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none"
                   >
                     <option value="">Unassigned</option>
-                    {team.members.map((m) => (
-                      <option key={m.userId} value={m.userId}>
-                        {m.user.name} ({m.role})
-                      </option>
-                    ))}
+                    {team.members
+                      .filter(
+                        (m) =>
+                          !!myRole &&
+                          canAssignTo(myRole, m.userId, user?.id ?? "")
+                      )
+                      .map((m) => (
+                        <option key={m.userId} value={m.userId}>
+                          {m.user.name} ({m.role})
+                        </option>
+                      ))}
                   </select>
+                  {myRole && !canAssignTo(myRole, "anyone-else", user?.id ?? "") && (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Members can only assign tasks to themselves.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -1145,8 +1400,11 @@ export default function TeamDetailPage({
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none"
                 >
                   <option value="MEMBER">Member</option>
-                  <option value="OWNER">Owner (Admin)</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Members can be promoted to Admin later by the team Owner.
+                </p>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
