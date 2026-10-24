@@ -1,8 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { loadTeamAccess } from "@/lib/teamAccess";
+import {
+  canAssignTo,
+  canDeleteTask,
+  canModifyTask,
+  type Role,
+} from "@/lib/permissions";
+
+const taskInclude = {
+  assignee: {
+    select: { id: true, name: true, email: true },
+  },
+  creator: {
+    select: { id: true, name: true, email: true },
+  },
+} as const;
 
 // PUT /api/tasks/[id] – Update a task
+// - Team task: OWNER/ADMIN can update any task; MEMBER only their own
+//   (created by them or assigned to them). MEMBER can only assign to self.
+// - Personal task (no team): only the creator or the assignee may update.
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -22,7 +41,7 @@ export async function PUT(
       include: {
         team: {
           include: {
-            members: true,
+            members: { select: { id: true, userId: true, role: true } },
           },
         },
       },
@@ -32,22 +51,37 @@ export async function PUT(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    // Permission check for updating:
-    // If task belongs to a team, user must be a member or owner of the team
-    if (existingTask.team) {
-      const isMember =
-        existingTask.team.ownerId === authUser.id ||
-        existingTask.team.members.some((m) => m.userId === authUser.id);
-
-      if (!isMember) {
+    let teamRole: Role | null = null;
+    if (existingTask.teamId) {
+      const access = await loadTeamAccess(authUser.id, existingTask.teamId);
+      if (!access.ok) {
         return NextResponse.json(
-          { error: "Forbidden: You are not a member of this task's team" },
-          { status: 403 }
+          {
+            error:
+              access.status === 404
+                ? "Team not found"
+                : "Forbidden: You are not a member of this task's team",
+          },
+          { status: access.status }
         );
       }
+      teamRole = access.role;
+    }
 
-      // If updating assigneeId, verify new assignee belongs to the team
-      if (assigneeId !== undefined && assigneeId !== null && assigneeId !== "") {
+    if (!canModifyTask(teamRole, existingTask, authUser.id)) {
+      return NextResponse.json(
+        {
+          error:
+            "Forbidden: Members can only update tasks they created or are assigned to",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Assignee rules: must belong to the task's team (if any);
+    // MEMBER can only assign the task to themselves.
+    if (assigneeId !== undefined && assigneeId !== null && assigneeId !== "") {
+      if (existingTask.team) {
         const isValidAssignee =
           existingTask.team.ownerId === assigneeId ||
           existingTask.team.members.some((m) => m.userId === assigneeId);
@@ -59,6 +93,13 @@ export async function PUT(
           );
         }
       }
+
+      if (!canAssignTo(teamRole, assigneeId, authUser.id)) {
+        return NextResponse.json(
+          { error: "Forbidden: Members can only assign tasks to themselves" },
+          { status: 403 }
+        );
+      }
     }
 
     if (title !== undefined && (!title || typeof title !== "string" || !title.trim())) {
@@ -68,6 +109,20 @@ export async function PUT(
       );
     }
 
+    if (status !== undefined && typeof status === "string" && status.trim()) {
+      const normalized = status.toUpperCase();
+      if (!["TODO", "IN_PROGRESS", "DONE"].includes(normalized)) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+    }
+
+    if (priority !== undefined && typeof priority === "string" && priority.trim()) {
+      const normalized = priority.toUpperCase();
+      if (!["LOW", "MEDIUM", "HIGH"].includes(normalized)) {
+        return NextResponse.json({ error: "Invalid priority" }, { status: 400 });
+      }
+    }
+
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
@@ -75,8 +130,12 @@ export async function PUT(
         ...(description !== undefined && {
           description: description ? description.trim() : null,
         }),
-        ...(status !== undefined && { status }),
-        ...(priority !== undefined && { priority }),
+        ...(status !== undefined && {
+          status: typeof status === "string" ? status.toUpperCase() : status,
+        }),
+        ...(priority !== undefined && {
+          priority: typeof priority === "string" ? priority.toUpperCase() : priority,
+        }),
         ...(dueDate !== undefined && {
           dueDate: dueDate ? new Date(dueDate) : null,
         }),
@@ -84,14 +143,7 @@ export async function PUT(
           assigneeId: assigneeId || null,
         }),
       },
-      include: {
-        assignee: {
-          select: { id: true, name: true, email: true },
-        },
-        creator: {
-          select: { id: true, name: true, email: true },
-        },
-      },
+      include: taskInclude,
     });
 
     return NextResponse.json(updatedTask);
@@ -105,7 +157,8 @@ export async function PUT(
 }
 
 // DELETE /api/tasks/[id] – Delete a task
-// "Only the task creator, the assignee, or the team Owner can delete a task."
+// - Team task: OWNER/ADMIN can delete any task; MEMBER only their own
+// - Personal task: only creator/assignee
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -121,7 +174,11 @@ export async function DELETE(
     const existingTask = await prisma.task.findUnique({
       where: { id },
       include: {
-        team: true,
+        team: {
+          include: {
+            members: { select: { id: true, userId: true, role: true } },
+          },
+        },
       },
     });
 
@@ -129,17 +186,28 @@ export async function DELETE(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    const isCreator = existingTask.creatorId === authUser.id;
-    const isAssignee = existingTask.assigneeId === authUser.id;
-    const isTeamOwner = existingTask.team?.ownerId === authUser.id;
+    let teamRole: Role | null = null;
+    if (existingTask.teamId) {
+      const access = await loadTeamAccess(authUser.id, existingTask.teamId);
+      if (!access.ok) {
+        return NextResponse.json(
+          {
+            error:
+              access.status === 404
+                ? "Team not found"
+                : "Forbidden: You are not a member of this task's team",
+          },
+          { status: access.status }
+        );
+      }
+      teamRole = access.role;
+    }
 
-    // If task has neither creator nor assignee nor team owner set (e.g. unassigned task), allow authenticated delete
-    const hasAnyOwner = existingTask.creatorId || existingTask.assigneeId || existingTask.team?.ownerId;
-    if (hasAnyOwner && !isCreator && !isAssignee && !isTeamOwner) {
+    if (!canDeleteTask(teamRole, existingTask, authUser.id)) {
       return NextResponse.json(
         {
           error:
-            "Forbidden: Only the task creator, assignee, or team owner can delete this task",
+            "Forbidden: Members can only delete tasks they created or are assigned to",
         },
         { status: 403 }
       );

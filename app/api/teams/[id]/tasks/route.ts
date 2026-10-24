@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { loadTeamAccess } from "@/lib/teamAccess";
+import { can, canAssignTo } from "@/lib/permissions";
 
 // GET /api/teams/:id/tasks – List tasks for a team
 export async function GET(
@@ -15,26 +17,16 @@ export async function GET(
 
     const { id: teamId } = await params;
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        members: true,
-      },
-    });
-
-    if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
+    const access = await loadTeamAccess(authUser.id, teamId);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.status === 404 ? "Team not found" : "Forbidden: You are not a member of this team" },
+        { status: access.status }
+      );
     }
 
-    const isMember =
-      team.ownerId === authUser.id ||
-      team.members.some((m) => m.userId === authUser.id);
-
-    if (!isMember) {
-      return NextResponse.json(
-        { error: "Forbidden: You are not a member of this team" },
-        { status: 403 }
-      );
+    if (!can(access.role, "task.view")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const tasks = await prisma.task.findMany({
@@ -60,7 +52,7 @@ export async function GET(
   }
 }
 
-// POST /api/teams/:id/tasks – Create a new task for a team
+// POST /api/teams/:id/tasks – Create a new task for a team (any member allowed)
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -73,22 +65,15 @@ export async function POST(
 
     const { id: teamId } = await params;
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        members: true,
-      },
-    });
-
-    if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
+    const access = await loadTeamAccess(authUser.id, teamId);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.status === 404 ? "Team not found" : "Forbidden: You are not a member of this team" },
+        { status: access.status }
+      );
     }
 
-    const isMember =
-      team.ownerId === authUser.id ||
-      team.members.some((m) => m.userId === authUser.id);
-
-    if (!isMember) {
+    if (!can(access.role, "task.create")) {
       return NextResponse.json(
         { error: "Forbidden: Only team members can create tasks in this team" },
         { status: 403 }
@@ -105,16 +90,38 @@ export async function POST(
       );
     }
 
-    // If assigneeId is provided, verify assignee is a member of this team
+    if (status !== undefined && typeof status === "string" && status.trim()) {
+      const normalized = status.toUpperCase();
+      if (!["TODO", "IN_PROGRESS", "DONE"].includes(normalized)) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+    }
+
+    if (priority !== undefined && typeof priority === "string" && priority.trim()) {
+      const normalized = priority.toUpperCase();
+      if (!["LOW", "MEDIUM", "HIGH"].includes(normalized)) {
+        return NextResponse.json({ error: "Invalid priority" }, { status: 400 });
+      }
+    }
+
+    // If assigneeId is provided, verify assignee is a member of this team.
+    // MEMBER can only assign the task to themselves (OWNER/ADMIN to anyone).
     if (assigneeId) {
       const isValidAssignee =
-        team.ownerId === assigneeId ||
-        team.members.some((m) => m.userId === assigneeId);
+        access.team.ownerId === assigneeId ||
+        access.team.members.some((m) => m.userId === assigneeId);
 
       if (!isValidAssignee) {
         return NextResponse.json(
           { error: "Assignee must be a member of the team" },
           { status: 400 }
+        );
+      }
+
+      if (!canAssignTo(access.role, assigneeId, authUser.id)) {
+        return NextResponse.json(
+          { error: "Forbidden: Members can only assign tasks to themselves" },
+          { status: 403 }
         );
       }
     }
@@ -123,8 +130,14 @@ export async function POST(
       data: {
         title: title.trim(),
         description: description ? description.trim() : null,
-        status: status || "TODO",
-        priority: priority || "MEDIUM",
+        status:
+          typeof status === "string" && status.trim()
+            ? status.toUpperCase()
+            : "TODO",
+        priority:
+          typeof priority === "string" && priority.trim()
+            ? priority.toUpperCase()
+            : "MEDIUM",
         dueDate: dueDate ? new Date(dueDate) : null,
         teamId,
         creatorId: authUser.id,

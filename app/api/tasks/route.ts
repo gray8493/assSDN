@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { isRole, type Role } from "@/lib/permissions";
 
 // GET /api/tasks – List tasks for current user
 export async function GET(request: Request) {
@@ -74,18 +75,23 @@ export async function POST(request: Request) {
     if (teamId) {
       const team = await prisma.team.findUnique({
         where: { id: teamId },
-        include: { members: true },
+        include: { members: { select: { id: true, userId: true, role: true } } },
       });
 
       if (!team) {
         return NextResponse.json({ error: "Team not found" }, { status: 404 });
       }
 
-      const isMember =
-        team.ownerId === authUser.id ||
-        team.members.some((m) => m.userId === authUser.id);
+      const membership = team.members.find((m) => m.userId === authUser.id);
+      const role: Role | null = membership
+        ? isRole(membership.role)
+          ? membership.role
+          : "MEMBER"
+        : team.ownerId === authUser.id
+          ? "OWNER"
+          : null;
 
-      if (!isMember) {
+      if (!role) {
         return NextResponse.json(
           { error: "Forbidden: You are not a member of this team" },
           { status: 403 }
@@ -101,6 +107,17 @@ export async function POST(request: Request) {
           return NextResponse.json(
             { error: "Assignee must be a member of the team" },
             { status: 400 }
+          );
+        }
+
+        // MEMBER can only assign the task to themselves
+        if (
+          !(role === "OWNER" || role === "ADMIN") &&
+          assigneeId !== authUser.id
+        ) {
+          return NextResponse.json(
+            { error: "Forbidden: Members can only assign tasks to themselves" },
+            { status: 403 }
           );
         }
       }

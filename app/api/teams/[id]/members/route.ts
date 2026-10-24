@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { loadTeamAccess } from "@/lib/teamAccess";
+import { can } from "@/lib/permissions";
 
 // GET /api/teams/:id/members – List team members
 export async function GET(
@@ -53,7 +55,7 @@ export async function GET(
   }
 }
 
-// POST /api/teams/:id/members – Add a member to a team (Owner only)
+// POST /api/teams/:id/members – Add a member to a team (OWNER & ADMIN only)
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -65,6 +67,21 @@ export async function POST(
     }
 
     const { id: teamId } = await params;
+    const access = await loadTeamAccess(authUser.id, teamId);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.status === 404 ? "Team not found" : "Forbidden: You are not a member of this team" },
+        { status: access.status }
+      );
+    }
+
+    if (!can(access.role, "member.add")) {
+      return NextResponse.json(
+        { error: "Forbidden: Only the team owner and admins can add members" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { email, role = "MEMBER" } = body;
 
@@ -72,21 +89,6 @@ export async function POST(
       return NextResponse.json(
         { error: "Member email is required" },
         { status: 400 }
-      );
-    }
-
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-    });
-
-    if (!team) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
-    }
-
-    if (team.ownerId !== authUser.id) {
-      return NextResponse.json(
-        { error: "Forbidden: Only the team owner can add members" },
-        { status: 403 }
       );
     }
 
@@ -117,7 +119,7 @@ export async function POST(
       );
     }
 
-    const memberRole = role === "OWNER" ? "OWNER" : "MEMBER";
+    const memberRole = role === "ADMIN" ? "ADMIN" : "MEMBER";
 
     const newMember = await prisma.teamMember.create({
       data: {

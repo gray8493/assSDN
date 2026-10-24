@@ -18,6 +18,18 @@ model User {
   teamMemberships TeamMember[]
   assignedTasks   Task[]       @relation("TaskAssignee")
   createdTasks    Task[]       @relation("TaskCreator")
+  messages        Message[]
+  notifications   Notification[]
+  activities      ActivityLog[]
+}
+
+// OWNER   : full control – members, roles, delete team, delete any task
+// ADMIN   : manage members except OWNER, manage all tasks, cannot delete team
+// MEMBER  : create & manage own tasks, view everything else
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
 }
 
 model Team {
@@ -29,6 +41,8 @@ model Team {
   createdAt   DateTime     @default(now())
   members     TeamMember[]
   tasks       Task[]
+  messages    Message[]
+  activities  ActivityLog[]
 }
 
 model TeamMember {
@@ -37,7 +51,7 @@ model TeamMember {
   team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role     String   @default("MEMBER")
+  role     Role     @default(MEMBER)
   joinedAt DateTime @default(now())
 
   @@unique([teamId, userId])
@@ -58,4 +72,48 @@ model Task {
   creator     User?     @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// Team chat message. Indexed by (teamId, createdAt) for cursor pagination.
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([teamId, createdAt])
+}
+
+// E.g. TASK_ASSIGNED, TEAM_ADDED, TEAM_REMOVED, ROLE_CHANGED
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  link      String?
+  refId     String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// Audit trail: who did what in a team, when (bonus feature)
+model ActivityLog {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String?
+  targetId   String?
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([teamId, createdAt])
 }
